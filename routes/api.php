@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
 
 Route::group([
@@ -32,5 +32,6 @@ Route::group([
     Route::post('refresh', [AuthController::class, 'refresh'])->name('refresh');
     Route::post('me', [AuthController::class, 'me'])->name('me');
     
-    Route::get('services', [AuthController::class, 'services'])->name('services');
+    Route::get('categories', [AuthController::class, 'categories'])->name('categories');
+    Route::post('services/{serviceId}/inquiry',[    AuthController::class, 'inquiry'])->name('inquiry');
 });

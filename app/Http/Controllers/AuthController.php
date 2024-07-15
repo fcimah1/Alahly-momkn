@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Throwable;
 
 class AuthController extends Controller
 {
@@ -30,6 +33,8 @@ class AuthController extends Controller
         if (! $token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'لم يتم تسحيل الدخول'], 401);
         }
+
+        //         $user->update(['api_token' => $token]);
 
         return $this->respondWithToken($token);
     }
@@ -95,78 +100,160 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function services()
+    public function categories(Request $request)
     {
-        return response()->json([
-            "code" => "200",
-            'message' => "عمليه ناجحه",
-            "serviceListVersion" => "82",
-            "serviceList" => [
-                "id" => 1,
-                "name" => "خدمات ممكن",
-                "parentID" => 0,
-                "lastNode" => false,
-                "index" => 0,
-                "level" => 0,
-                "serviceSubCategoryLabel" => "",
-                "services" => [],
-                "serviceCategory" => [
-                    "id" => 195,
-                    "name" => "مواصلات",
-                    "parentID" => 1,
-                    "lastNode" => false,
-                    "index" => 195,
-                    "level" => 2,
-                    "serviceSubCategoryLabel" => "الشركه",
-                    "services" => [],
-                    "serviceCategory" => [
-                        "id" => 196,
-                        "name" => "جوباص",
-                        "parentID" => 195,
-                        "lastNode" => true,
-                        "index" => 196,
-                        "level" => 3,
+      try{
+
+        if($request->server()['HTTP_AUTHORIZATION'])
+        {
+            return response()->json([
+                "code" => "200",
+                'message' => "عمليه ناجحه",
+                "serviceListVersion" => "82",
+                "serviceList" => [
+                        "id" => 1,
+                        "name" => "خدمات ممكن",
+                        "parentID" => 0,
+                        "lastNode" => false,
+                        "index" => 0,
+                        "level" => 0,
                         "serviceSubCategoryLabel" => "",
-                        "services" => [
-                            "serviceID" => 646,
-                            "serviceName" => "جو باص",
-                            "value" => 0.00,
-                            "categoryTitle" => "",
-                            "paymentModeID" => 1,
-                            "status" => 1,
-                            "currency" => "مصري",
-                            "minValue" => 1.00,
-                            "maxValue" => 1000000.00,
-                            "interval" => 5,
-                            "inquirable" => true,
-                            "billPaymentModeID" => 1,
-                            "serviceTypeID" => 3,
-                            "serviceParameter" => [
-                                "label" => "الرقم الالكترونى",
-                                "title" => "برجاء ادخال الرقم الالكترونى",
-                                "valueModeID" => "2",
-                                "valueTypeID" => "1",
-                                "optional" => false,
-                                "sequence" => "1",
-                                "key" => "customerNumber",
-                                "valueList" => [
-                                    "values" => []
-                                ],
-                                "value" => "0",
-                                "validationExpression" => "^[0-9]{1,30}$",
-                                "validationMessage" => "الرقم غير صحيح",
-                                "methodIds" => "1",
-                                "displayed" => true
+                        "services" => [],
+                        "serviceCategory" => [
+                                "id" => 195,
+                                "name" => "مواصلات",
+                                "parentID" => 1,
+                                "lastNode" => false,
+                                "index" => 195,
+                                "level" => 2,
+                                "serviceSubCategoryLabel" => "الشركه",
+                                "services" => [],
+                                "serviceCategory" => [
+                                        "id" => 196,
+                                        "name" => "جوباص",
+                                        "parentID" => 195,
+                                        "lastNode" => true,
+                                        "index" => 196,
+                                        "level" => 3,
+                                        "serviceSubCategoryLabel" => "",
+                                        "services" => [
+                                                "serviceID" => 646,
+                                                "serviceName" => "جو باص",
+                                                "value" => 0.00,
+                                                "categoryTitle" => "",
+                                                "paymentModeID" => 1,
+                                                "status" => 1,
+                                                "currency" => "مصري",
+                                                "minValue" => 1.00,
+                                                "maxValue" => 1000000.00,
+                                                "interval" => 5,
+                                                "inquirable" => true,
+                                                "billPaymentModeID" => 1,
+                                                "serviceTypeID" => 3,
+                                                "serviceParameter" => [
+                                                        "label" => "الرقم الالكترونى",
+                                                        "title" => "برجاء ادخال الرقم الالكترونى",
+                                                        "valueModeID" => "2",
+                                                        "valueTypeID" => "1",
+                                                        "optional" => false,
+                                                        "sequence" => "1",
+                                                        "key" => "customerNumber",
+                                                        "valueList" => [
+                                                                "values" => []
+                                                            ],
+                                                        "value" => "0",
+                                                        "validationExpression" => "^[0-9]{1,30}$",
+                                                        "validationMessage" => "الرقم غير صحيح",
+                                                        "methodIds" => "1",
+                                                        "displayed" => true
+                                                    ]
+                                            ],
+                                        "serviceCategory" => []
+
+
+                                    ]
+
                             ]
-                        ],
-                        "serviceCategory" => []
-
-
                     ]
 
-                ]
-            ]
+            ], 200);
+        }else{
+            return response()->json([
+                "Code" => -16,
+                "Message" => "لا توجد بيانات"
+            ], 401);
+        }
+      }catch(Throwable $th){
+            return response()->json([
+                "code" => '500',
+                "message" => 'فشل تسحيل الدخول',
+            ],401);
+      }
+        
+    }
 
+    public function inquiry($serviceId, Request $request)
+    {
+        // dd($request->json());
+        $req = $request->validate([
+            'BillingAccount' => 'required',
+            'Version' => 'required',
+            'ServiceListVersion' => 'required',
+            // 'Data' => 'optional',
         ]);
+
+        if($req){
+            try{
+                return response()->json([
+                    "Code" => 200,
+                    "Message" => "عمليه ناجحه",
+                    "TotalAmount" => 21995.0,
+                    "Brn" => 145147,
+                    "Data" => [
+                        [
+                            "key" => "CustomerName",
+                            "value" => "سميحه وليم حنا",
+                            "name" => "اسم العميل",
+                        ],
+                        [
+                            "key" => "Installment",
+                            "value" => "21995",
+                            "name" => "القسط"
+                        ],
+                        [
+                            "key" => "Penalty",
+                            "value" => "2000",
+                            "name" => "الغرامة"
+                        ]
+                    ],
+
+                    "Invoices" => [
+
+                        "Amount" => 21995.0,
+                        "Sequence" => 2,
+                        "mandatory" => "true",
+                        "minAmount" => 21995.0,
+                        "maxAmount" => 21995.0,
+                        "alias" => null,
+                        "Data" => []
+
+                    ]
+                ], 200);
+            }
+            catch(Throwable $th){
+                return response()->json([
+                    "code" => -31,
+                    "message" => "رقم تلفون غير صحيح ",
+                ], -31);
+            }
+        }
+        else{
+            return response()->json([
+                "Code" => -13,
+                "Message" => "يوجد بيانات ناقصة"
+
+            ], -13);
+        }
+        
     }
 }
