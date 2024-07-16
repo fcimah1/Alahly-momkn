@@ -34,4 +34,5 @@ Route::group([
     
     Route::get('categories', [AuthController::class, 'categories'])->name('categories');
     Route::post('services/{serviceId}/inquiry',[    AuthController::class, 'inquiry'])->name('inquiry');
+    Route::post('services/{serviceId}/fees',[    AuthController::class, 'fees'])->name('fees');
 });

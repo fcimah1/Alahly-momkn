@@ -102,7 +102,7 @@ class AuthController extends Controller
 
     public function categories(Request $request)
     {
-      try{
+    try{
 
         if($request->server()['HTTP_AUTHORIZATION'])
         {
@@ -183,23 +183,22 @@ class AuthController extends Controller
                 "Message" => "لا توجد بيانات"
             ], 401);
         }
-      }catch(Throwable $th){
+    }catch(Throwable $th){
             return response()->json([
                 "code" => '500',
                 "message" => 'فشل تسحيل الدخول',
             ],401);
-      }
+    }
         
     }
 
     public function inquiry($serviceId, Request $request)
     {
-        // dd($request->json());
         $req = $request->validate([
             'BillingAccount' => 'required',
             'Version' => 'required',
             'ServiceListVersion' => 'required',
-            // 'Data' => 'optional',
+            'Data' => 'nullable',
         ]);
 
         if($req){
@@ -239,6 +238,54 @@ class AuthController extends Controller
 
                     ]
                 ], 200);
+            }
+            catch(Throwable $th){
+                return response()->json([
+                    "code" => -31,
+                    "message" => "رقم تلفون غير صحيح ",
+                ], -31);
+            }
+        }
+        else{
+            return response()->json([
+                "Code" => -13,
+                "Message" => "يوجد بيانات ناقصة"
+
+            ], -13);
+        }
+        
+    }
+
+    public function fees($serviceId, Request $request)
+    {
+        if(!$request->has('Amount')){
+            return response()->json([
+                "Code" => -13,
+                "Message" => "يوجد بيانات ناقصه"
+            ], 401);
+        }
+        $req = $request->validate([
+            'Amount' => 'required',
+            'Version' => 'required',
+            "Brn" => 'required',
+            'ServiceListVersion' => 'required',
+            'Data' => 'nullable',
+        ]);
+
+        if($req){
+            try{
+                
+                return response()->json(
+                    [
+                    
+                        "Code" => 200,
+                        "Message" => "عمليه ناجحه",
+                        "amount" => 21161,
+                        "fees" => 20,
+                        "taxes" => 0,
+                        "totalAmount" => 21181,
+                        "brn" => 65400
+                    ], 200);
             }
             catch(Throwable $th){
                 return response()->json([
