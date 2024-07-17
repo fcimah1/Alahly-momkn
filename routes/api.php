@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ServiceControoler;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,13 +28,16 @@ Route::group([
     'prefix' => 'auth'
 
 ], function ($router) {
+    Route::group(['prefix' => 'accounts'], function () {
 
-    Route::post('login', [AuthController::class,'login'])->name('login');
-    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
-    Route::post('refresh', [AuthController::class, 'refresh'])->name('refresh');
-    Route::post('me', [AuthController::class, 'me'])->name('me');
+        Route::post('authenticate', [AuthController::class, 'login'])->name('login');
+        Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+        Route::get('balances', [AuthController::class, 'getBalance'])->name('balance');
+        Route::post('refresh', [AuthController::class, 'refresh'])->name('refresh');
+        Route::post('changepassword', [AuthController::class, 'changePassword'])->name('changePassword');
+    });
     
-    Route::get('categories', [AuthController::class, 'categories'])->name('categories');
-    Route::post('services/{serviceId}/inquiry',[    AuthController::class, 'inquiry'])->name('inquiry');
-    Route::post('services/{serviceId}/fees',[    AuthController::class, 'fees'])->name('fees');
+    Route::get('categories', [CategoryController::class, 'categories'])->name('categories');
+    Route::post('services/{serviceId}/inquiry',[    ServiceControoler::class, 'inquiry'])->name('inquiry');
+    Route::post('services/{serviceId}/fees',[    ServiceControoler::class, 'fees'])->name('fees');
 });

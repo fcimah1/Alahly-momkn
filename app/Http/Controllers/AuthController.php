@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Throwable;
@@ -100,207 +101,59 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function categories(Request $request)
+    public function getBalance($accountId)
     {
-    try{
-
-        if($request->server()['HTTP_AUTHORIZATION'])
-        {
-            return response()->json([
-                "code" => "200",
-                'message' => "عمليه ناجحه",
-                "serviceListVersion" => "82",
-                "serviceList" => [
-                        "id" => 1,
-                        "name" => "خدمات ممكن",
-                        "parentID" => 0,
-                        "lastNode" => false,
-                        "index" => 0,
-                        "level" => 0,
-                        "serviceSubCategoryLabel" => "",
-                        "services" => [],
-                        "serviceCategory" => [
-                                "id" => 195,
-                                "name" => "مواصلات",
-                                "parentID" => 1,
-                                "lastNode" => false,
-                                "index" => 195,
-                                "level" => 2,
-                                "serviceSubCategoryLabel" => "الشركه",
-                                "services" => [],
-                                "serviceCategory" => [
-                                        "id" => 196,
-                                        "name" => "جوباص",
-                                        "parentID" => 195,
-                                        "lastNode" => true,
-                                        "index" => 196,
-                                        "level" => 3,
-                                        "serviceSubCategoryLabel" => "",
-                                        "services" => [
-                                                "serviceID" => 646,
-                                                "serviceName" => "جو باص",
-                                                "value" => 0.00,
-                                                "categoryTitle" => "",
-                                                "paymentModeID" => 1,
-                                                "status" => 1,
-                                                "currency" => "مصري",
-                                                "minValue" => 1.00,
-                                                "maxValue" => 1000000.00,
-                                                "interval" => 5,
-                                                "inquirable" => true,
-                                                "billPaymentModeID" => 1,
-                                                "serviceTypeID" => 3,
-                                                "serviceParameter" => [
-                                                        "label" => "الرقم الالكترونى",
-                                                        "title" => "برجاء ادخال الرقم الالكترونى",
-                                                        "valueModeID" => "2",
-                                                        "valueTypeID" => "1",
-                                                        "optional" => false,
-                                                        "sequence" => "1",
-                                                        "key" => "customerNumber",
-                                                        "valueList" => [
-                                                                "values" => []
-                                                            ],
-                                                        "value" => "0",
-                                                        "validationExpression" => "^[0-9]{1,30}$",
-                                                        "validationMessage" => "الرقم غير صحيح",
-                                                        "methodIds" => "1",
-                                                        "displayed" => true
-                                                    ]
-                                            ],
-                                        "serviceCategory" => []
-
-
-                                    ]
-
-                            ]
-                    ]
-
-            ], 200);
-        }else{
-            return response()->json([
-                "Code" => -16,
-                "Message" => "لا توجد بيانات"
-            ], 401);
-        }
-    }catch(Throwable $th){
-            return response()->json([
-                "code" => '500',
-                "message" => 'فشل تسحيل الدخول',
-            ],401);
-    }
-        
+       // $balance = User::findOrFail($accountId);
+        return response()->json([
+            "Code" => 200,
+            "Message" => "Success",
+            "TotalAvailableBalance" => 438808.951,
+            "Points" => 29.0,
+            "TotalBalance" => 438903.855,
+            "Balances" => [
+                [
+                    "ID" => 1,
+                    "Name" => "ممكن رصيد",
+                    "Balance" => 438888.855,
+                    "AvailableBalance" => 438808.951
+                ],
+                [
+                    "ID" => 2,
+                    "Name" => "Nameرصيد كاش",
+                    "Balance" => 15.0,
+                    "AvailableBalance" => 0.0
+                ]
+            ]
+        ]);
     }
 
-    public function inquiry($serviceId, Request $request)
+    public function changePassword(Request $request)
     {
         $req = $request->validate([
-            'BillingAccount' => 'required',
-            'Version' => 'required',
-            'ServiceListVersion' => 'required',
-            'Data' => 'nullable',
+            'username' => 'required',
+            'password' => 'required',
+            'changeType' => 'required',
+            'newPassword' => 'required'
         ]);
-
-        if($req){
-            try{
-                return response()->json([
-                    "Code" => 200,
-                    "Message" => "عمليه ناجحه",
-                    "TotalAmount" => 21995.0,
-                    "Brn" => 145147,
-                    "Data" => [
-                        [
-                            "key" => "CustomerName",
-                            "value" => "سميحه وليم حنا",
-                            "name" => "اسم العميل",
-                        ],
-                        [
-                            "key" => "Installment",
-                            "value" => "21995",
-                            "name" => "القسط"
-                        ],
-                        [
-                            "key" => "Penalty",
-                            "value" => "2000",
-                            "name" => "الغرامة"
-                        ]
-                    ],
-
-                    "Invoices" => [
-
-                        "Amount" => 21995.0,
-                        "Sequence" => 2,
-                        "mandatory" => "true",
-                        "minAmount" => 21995.0,
-                        "maxAmount" => 21995.0,
-                        "alias" => null,
-                        "Data" => []
-
-                    ]
-                ], 200);
-            }
-            catch(Throwable $th){
-                return response()->json([
-                    "code" => -31,
-                    "message" => "رقم تلفون غير صحيح ",
-                ], -31);
-            }
-        }
-        else{
+        if(Auth()->attempt(['password'])){
+            User::where('id')->set(['password',$request->newPassword]);
             return response()->json([
-                "Code" => -13,
-                "Message" => "يوجد بيانات ناقصة"
-
-            ], -13);
+                "Message" => 'ناجحه عمليه',
+                "Code" => 200,
+                "AccountId" => 6,
+                "LocalDate" => "0001-01-01T00:00:00",
+                "ServerDate" => "0001-01-01T00:00:00",
+                "Token" => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjExMXw2fDJ
+                8MjIzMDciLCJ uYmYiOjE2MjI1NTIwNDEsImV4cCI6MTYyMjU1MjA0MSwiaWF0IjoxNjIyNTUyMDQxfQ.4
+                3YcsKnRnsUPK UyIeys_HhoC1S5w4ehsRH9XdbhS8aY",
+                "AccountName" => "IT",
+                "AcountType" => 10,
+                "ID" => 0,
+                "ServiceListVersion" => null,
+                "Version" => null,
+                "Balance" => 0,
+                "AvailableBalance" => 0
+            ]);
         }
-        
-    }
-
-    public function fees($serviceId, Request $request)
-    {
-        if(!$request->has('Amount')){
-            return response()->json([
-                "Code" => -13,
-                "Message" => "يوجد بيانات ناقصه"
-            ], 401);
-        }
-        $req = $request->validate([
-            'Amount' => 'required',
-            'Version' => 'required',
-            "Brn" => 'required',
-            'ServiceListVersion' => 'required',
-            'Data' => 'nullable',
-        ]);
-
-        if($req){
-            try{
-                
-                return response()->json(
-                    [
-                    
-                        "Code" => 200,
-                        "Message" => "عمليه ناجحه",
-                        "amount" => 21161,
-                        "fees" => 20,
-                        "taxes" => 0,
-                        "totalAmount" => 21181,
-                        "brn" => 65400
-                    ], 200);
-            }
-            catch(Throwable $th){
-                return response()->json([
-                    "code" => -31,
-                    "message" => "رقم تلفون غير صحيح ",
-                ], -31);
-            }
-        }
-        else{
-            return response()->json([
-                "Code" => -13,
-                "Message" => "يوجد بيانات ناقصة"
-
-            ], -13);
-        }
-        
     }
 }
