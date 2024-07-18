@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 
@@ -28,9 +30,9 @@ class AuthController extends Controller
      */
     public function login()
     {
-        $credentials = request(['username', 'password']);
+        // dd(env('USER_NAME'));
+        $credentials = ['username' => env('USER_NAME'),'password' =>  env('USER_PASSWORD')];
 
-        // dd($credentials);
         if (! $token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'لم يتم تسحيل الدخول'], 401);
         }
@@ -90,40 +92,21 @@ class AuthController extends Controller
             'token_type' => 'bearer',
             'accountId' => auth()->user()->id,
             'acountName' => auth()->user()->name,
-            'localDate' => date('c') ,
-            'serverDate' => date('c'),
-            'accountType' => auth()->user()->role,
-            'serviceListVersion' => '1.0',
-            'version ' => '1',
-            'balance' => 'auth()->user()->balance',
-            'availableBalance' => 'auth()->user()->balance',
+            'balance' => auth()->user()->balance,
+            'availableBalance' => auth()->user()->balance,
             'expires_in' => auth()->factory()->getTTL() * 60 * 24
         ], 200);
     }
 
-    public function getBalance($accountId)
+    public function getBalance()
     {
-       // $balance = User::findOrFail($accountId);
+       $balance = User::findOrFail(auth()->user()->id);
+    //    dd($balance);
+        
         return response()->json([
             "Code" => 200,
             "Message" => "Success",
-            "TotalAvailableBalance" => 438808.951,
-            "Points" => 29.0,
-            "TotalBalance" => 438903.855,
-            "Balances" => [
-                [
-                    "ID" => 1,
-                    "Name" => "ممكن رصيد",
-                    "Balance" => 438888.855,
-                    "AvailableBalance" => 438808.951
-                ],
-                [
-                    "ID" => 2,
-                    "Name" => "Nameرصيد كاش",
-                    "Balance" => 15.0,
-                    "AvailableBalance" => 0.0
-                ]
-            ]
+            "TotalBalance" => $balance->balance,
         ]);
     }
 
@@ -132,27 +115,23 @@ class AuthController extends Controller
         $req = $request->validate([
             'username' => 'required',
             'password' => 'required',
-            'changeType' => 'required',
             'newPassword' => 'required'
         ]);
-        if(Auth()->attempt(['password'])){
-            User::where('id')->set(['password',$request->newPassword]);
+        if(password_verify($request->password,auth()->user()->password)){
+
+            User::where('id', auth()->user()->id)->update(['password'=> encrypt($request->newPassword)]);
+            $token = auth()->user()->accessToken;
             return response()->json([
-                "Message" => 'ناجحه عمليه',
                 "Code" => 200,
-                "AccountId" => 6,
+                "Message" => 'تم تغير كلمه السر بنجاح',
                 "LocalDate" => "0001-01-01T00:00:00",
                 "ServerDate" => "0001-01-01T00:00:00",
-                "Token" => "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IjExMXw2fDJ
-                8MjIzMDciLCJ uYmYiOjE2MjI1NTIwNDEsImV4cCI6MTYyMjU1MjA0MSwiaWF0IjoxNjIyNTUyMDQxfQ.4
-                3YcsKnRnsUPK UyIeys_HhoC1S5w4ehsRH9XdbhS8aY",
-                "AccountName" => "IT",
-                "AcountType" => 10,
-                "ID" => 0,
-                "ServiceListVersion" => null,
-                "Version" => null,
-                "Balance" => 0,
-                "AvailableBalance" => 0
+                "Token" => $token
+            ]);
+        }else{
+            return response()->json([
+                "Code" => 401,
+                "Message" => 'كلمه السر غير صحيحه'
             ]);
         }
     }

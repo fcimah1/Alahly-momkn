@@ -25,19 +25,16 @@ use Illuminate\Support\Facades\Route;
 Route::group([
 
     'middleware' => 'api',
-    'prefix' => 'auth'
+    'prefix' => 'gateway/api/v2/'
 
 ], function ($router) {
-    Route::group(['prefix' => 'accounts'], function () {
-
+    Route::group(['prefix' => 'accounts/1/'], function () {
         Route::post('authenticate', [AuthController::class, 'login'])->name('login');
-        Route::post('logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('balances', [AuthController::class, 'getBalance'])->name('balance');
-        Route::post('refresh', [AuthController::class, 'refresh'])->name('refresh');
         Route::post('changepassword', [AuthController::class, 'changePassword'])->name('changePassword');
     });
     
-    Route::get('categories', [CategoryController::class, 'categories'])->name('categories');
+    Route::get('categories/0', [CategoryController::class, 'showCategories'])->name('categories');
     Route::post('services/{serviceId}/inquiry',[    ServiceControoler::class, 'inquiry'])->name('inquiry');
     Route::post('services/{serviceId}/fees',[    ServiceControoler::class, 'fees'])->name('fees');
 });
