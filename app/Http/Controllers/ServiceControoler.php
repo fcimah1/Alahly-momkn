@@ -49,7 +49,7 @@ class ServiceControoler extends Controller
             'data' => 'nullable',
         ]);
 
-        if(auth()->user()->balance < $request->amount){
+        if (auth()->user()->balance < $request->amount) {
             return response()->json([
                 "Code" => -17,
                 "Message" => "قيمه خاطئة يجب دفع المبلغ المطلوب من نتيجة الاستعلام"
@@ -58,7 +58,7 @@ class ServiceControoler extends Controller
         $category = Category::find($serviceId);
         $amount = $request->amount;
         $fees = $category->fee_percet;
-        $amountWithFees = ($amount * $fees)/100 + $amount;
+        $amountWithFees = ($amount * $fees) / 100 + $amount;
         return response()->json([
             "Code" => 200,
             "Message" => "عمليه ناجحه",
@@ -72,4 +72,59 @@ class ServiceControoler extends Controller
             ]
         ], 200);
     }
+
+    public function payment($serviceId, Request $request)
+    {
+        $req = $request->validate([
+            'amount' => 'required',
+            'version' => 'required',
+            "Brn" => 'required',
+            'serviceListVersion' => 'required',
+            'billPaymentMode' => 'required',
+            'data' => 'nullable',
+        ]);
+
+        switch ($request->serviceListVersion) {
+
+            case 1:
+            
+                switch ($request->billPaymentMode) {
+                    case 1:
+                        # code...
+                        break;
+                    case 2:
+                        # code...
+                        break;
+                    case 3:
+                        # code...
+                        break;
+                    default:
+                        $message = "Invalid bill payment mode";
+                        break;
+                    }
+            
+            case 2:
+                if ($request->billPaymentMode == 1) {
+                    # code...
+                } else {
+                    $message = "Invalid bill payment mode";
+                }
+                break;
+            case 3:
+                if (in_array($request->billPaymentMode, [1, 2, 3])) {
+                    # code...
+                } else {
+                    $message = "Invalid bill payment mode";
+                }
+                break;
+
+            default:
+                $message = "Invalid service list version";
+                break;
+                }
+            return response()->json([
+                "Code" => 200,
+                "Message" => $message,
+                ], 200);
+        }
 }
